@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamepad Tester: controller test, stick drift and rumble checker for Android</title>
+<meta name="description" content="Test any game controller on Android: live gamepad view, stick drift and range tests, button and trigger checks, rumble patterns and controller info. Includes a free arcade game.">
+<meta name="theme-color" content="#0E1116">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gamepad Tester for Android">
+<meta property="og:description" content="Check stick drift, buttons, triggers and rumble on any controller, then play a quick arcade game.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gamepad Tester",
+  "operatingSystem": "Android 8.0 or newer",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Test game controllers on Android: stick drift, range, buttons, triggers, rumble and controller info.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<style>
+  :root{
+    --bg:#0E1116; --card:#171C24; --card-hi:#212835; --line:#2F394A;
+    --accent:#4DE1A5; --on-accent:#07130D; --text:#E8ECF3; --muted:#9AA4B6;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  img{max-width:100%;height:auto;display:block}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  h1,h2,h3{line-height:1.2;margin:0}
+  h2{font-size:clamp(1.6rem,3.4vw,2.1rem);margin-bottom:.4rem}
+  .lead{color:var(--muted);font-size:1.08rem;max-width:60ch}
+
+  /* header */
+  header{position:sticky;top:0;z-index:10;background:rgba(14,17,22,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:18px;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--text);text-decoration:none;font-size:1.05rem}
+  .brand img{width:34px;height:34px;border-radius:9px}
+  nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+  nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;font-size:.95rem}
+  nav a:hover{color:var(--text);background:var(--card)}
+  nav a.policy{color:var(--text);border:1px solid var(--line)}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 24px;border-radius:999px;font-weight:700;text-decoration:none;font-size:1rem;border:2px solid transparent;transition:transform .15s,background .15s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.primary{background:var(--accent);color:var(--on-accent)}
+  .btn.ghost{border-color:var(--line);color:var(--text);background:var(--card)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn svg{width:20px;height:20px;flex:none}
+
+  /* hero */
+  .hero{padding:56px 0 24px;background:radial-gradient(900px 420px at 80% -10%,rgba(77,225,165,.16),transparent 60%)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+  .eyebrow{display:inline-block;color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+  .hero h1{font-size:clamp(2.2rem,5.4vw,3.6rem);letter-spacing:-.02em}
+  .hero h1 span{color:var(--accent)}
+  .hero .lead{margin:18px 0 26px}
+  .cta{display:flex;flex-wrap:wrap;gap:12px}
+  .note{color:var(--muted);font-size:.88rem;margin-top:14px}
+  .frame{background:var(--card-hi);padding:10px;border-radius:26px;border:2px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 90px rgba(77,225,165,.10)}
+  .frame img{border-radius:18px;width:100%}
+
+  section{padding:64px 0}
+  .head{margin-bottom:28px}
+
+  /* features */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}
+  .card .ico{width:44px;height:44px;border-radius:12px;background:rgba(77,225,165,.14);color:var(--accent);display:grid;place-items:center;font-size:1.3rem;margin-bottom:12px}
+  .card h3{font-size:1.1rem;margin-bottom:6px}
+  .card p{margin:0;color:var(--muted);font-size:.97rem}
+
+  /* screenshots */
+  .shots{display:flex;align-items:center;gap:18px;overflow-x:auto;padding:6px 20px 22px;margin:0 -20px;scroll-snap-type:x mandatory}
+  .shots figure{margin:0;flex:none;scroll-snap-align:center;text-align:center}
+  .shots img{border-radius:22px;border:2px solid var(--line);background:var(--card);box-shadow:0 16px 40px rgba(0,0,0,.45)}
+  .shots .p img{height:560px;width:auto}
+  .shots .l img{height:315px;width:auto}
+  .shots figcaption{margin-top:12px;color:var(--muted);font-size:.9rem}
+  .shots::-webkit-scrollbar{height:8px}.shots::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+
+  /* game */
+  .game{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+  .controls{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:8px}
+  .controls li{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.95rem}
+  .controls b{color:var(--accent);min-width:128px;font-weight:700}
+
+  /* faq */
+  details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin-bottom:10px}
+  summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--accent);font-size:1.3rem;line-height:1}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--muted);margin:12px 0 0}
+
+  /* cta + footer */
+  .final{text-align:center;background:linear-gradient(180deg,transparent,rgba(77,225,165,.08))}
+  .final .cta{justify-content:center;margin-top:20px}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:.92rem}
+  .foot{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:center}
+  .foot nav{margin:0}
+
+  @media (max-width:860px){
+    .hero-grid,.game{grid-template-columns:1fr}
+    .grid{grid-template-columns:1fr 1fr}
+    nav a:not(.policy){display:none}
+  }
+  @media (max-width:560px){
+    .grid{grid-template-columns:1fr}
+    .shots .p img{height:470px}.shots .l img{height:264px}
+    .btn{width:100%}
+    .controls b{min-width:104px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top"><img src="img/icon-192.png" alt="" width="34" height="34">Gamepad Tester</a>
+    <nav aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#game">Game</a>
+      <a href="#faq">FAQ</a>
+      <a class="policy" href="privacy-policy.html">Privacy Policy</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Free for Android</span>
+        <h1>Test your controller in <span>seconds</span></h1>
+        <p class="lead">See every stick, button and trigger live. Check for stick drift, find faulty buttons, try the rumble, then play a quick arcade game that uses every control.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.digiera.gamepadtester">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 5 3.5z"/></svg>
+            Get it on Google Play
+          </a>
+          <a class="btn ghost" href="privacy-policy.html">Privacy Policy</a>
+        </div>
+        <p class="note">Works with Xbox, PlayStation and most Bluetooth or USB controllers that Android recognises. Android 8.0 or newer.</p>
+      </div>
+      <div class="frame">
+        <img src="img/shot-tablet.jpg" alt="Gamepad Tester showing a full-screen gamepad with live stick, trigger and button readings" width="1280" height="800">
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <div class="head">
+        <h2>Everything you need to check a controller</h2>
+        <p class="lead">One app, six checks, no setup. Connect a controller and press a button.</p>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="ico">🎮</div><h3>Live gamepad view</h3><p>Both sticks with L3 and R3 clicks, D-pad, A/B/X/Y, bumpers, triggers with percentages and Select/Start/Mode, all on one screen. Switch between Xbox and PlayStation labels.</p></div>
+        <div class="card"><div class="ico">◎</div><h3>Stick drift test</h3><p>Let go of the sticks and the app measures how far each one wanders on its own, gives a plain verdict and recommends a deadzone.</p></div>
+        <div class="card"><div class="ico">⭕</div><h3>Stick range test</h3><p>Roll each stick around its edge and watch the shape fill in. If a direction never fills, the stick isn't reaching it.</p></div>
+        <div class="card"><div class="ico">▦</div><h3>Button checks</h3><p>Press counts for every button, double-press (bounce) detection, stuck-button warnings and a mash test to see how fast you can go.</p></div>
+        <div class="card"><div class="ico">📈</div><h3>Trigger curves</h3><p>Pull a trigger slowly and see the curve. A good one rises smoothly to 100%. A worn one jumps or never gets there.</p></div>
+        <div class="card"><div class="ico">≋</div><h3>Rumble tests</h3><p>Try each vibration motor alone or together, set the strength and length, and run patterns like pulses, ramp up and heartbeat.</p></div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="card"><div class="ico">ⓘ</div><h3>Controller info</h3><p>Name, vendor and product ID, supported buttons, every axis with its range, battery and motion sensors when your controller shares them.</p></div>
+        <div class="card"><div class="ico">📄</div><h3>Shareable report</h3><p>One tap creates a plain-text test report. Handy for a refund, a warranty claim or a forum post.</p></div>
+        <div class="card"><div class="ico">⏱</div><h3>Rate and delay</h3><p>See the update rate and input delay live, plus a timestamped event log of everything the controller sends.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS -->
+  <section id="screenshots" style="padding-top:8px">
+    <div class="wrap">
+      <div class="head"><h2>See it in action</h2><p class="lead">Dark and light themes, phone and tablet layouts.</p></div>
+      <div class="shots" tabindex="0" aria-label="App screenshots">
+        <figure class="l"><img src="img/shot-test.jpg" alt="Live full-screen gamepad view" width="960" height="540" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-drift.jpg" alt="Stick drift test results" width="540" height="960" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-range.jpg" alt="Stick range test with filled shapes" width="540" height="960" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-triggers.jpg" alt="Trigger linearity curves" width="540" height="960" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-buttons.jpg" alt="Button press counts and states" width="540" height="960" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-vibrate.jpg" alt="Rumble test controls" width="540" height="960" loading="lazy"></figure>
+        <figure class="p"><img src="img/shot-info.jpg" alt="Controller information screen" width="540" height="960" loading="lazy"></figure>
+        <figure class="l"><img src="img/shot-game.jpg" alt="Neon Arena arcade game" width="960" height="540" loading="lazy"></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game">
+    <div class="wrap game">
+      <div>
+        <span class="eyebrow">Built in</span>
+        <h2>Play Neon Arena</h2>
+        <p class="lead">A quick arcade shooter that uses every part of your controller. Survive the swarm, chain combos and beat your high score. Your controller rumbles when you get hit.</p>
+        <ul class="controls">
+          <li><b>Left stick</b> move</li>
+          <li><b>Right stick</b> aim</li>
+          <li><b>RT / RB</b> fire (pull RT harder to fire faster)</li>
+          <li><b>LT / LB</b> slow motion</li>
+          <li><b>A · B · X</b> dash · bomb · shield</li>
+          <li><b>Y / D-pad</b> switch weapon</li>
+          <li><b>Start · Select</b> pause · restart</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="img/shot-game.jpg" alt="Neon Arena gameplay" width="960" height="540" loading="lazy"></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" style="padding-top:8px">
+    <div class="wrap" style="max-width:820px">
+      <div class="head"><h2>Questions</h2></div>
+      <details><summary>Which controllers work?</summary><p>Most controllers that Android recognises over Bluetooth or USB (use a USB-C OTG adapter for wired ones). That includes Xbox and PlayStation pads and many third-party controllers. Whether vibration, battery and motion sensors show up depends on your controller and your Android version.</p></details>
+      <details><summary>My controller isn't showing up</summary><p>Pair it in your phone's Bluetooth settings (or plug it in with an OTG adapter), then open the app and press any button. If it still doesn't appear, check that the controller works in another app and try a different cable or adapter.</p></details>
+      <details><summary>Does it need an internet connection?</summary><p>All the tests work offline. Ads, and checking the Remove Ads purchase, need a connection.</p></details>
+      <details><summary>Is it free? How do I remove the ads?</summary><p>The app is free and shows a few small ads: a banner on some screens, one when the app opens and an occasional one after a game. Never on the gamepad screen or while you play. A one-time purchase in Settings removes all ads for good.</p></details>
+      <details><summary>What data does the app collect?</summary><p>Your controller data stays on your phone. The ads are provided by Google AdMob, which may use your advertising ID and similar data. Everything is explained in the <a href="privacy-policy.html">privacy policy</a>.</p></details>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap">
+      <h2>Got a controller that behaves oddly?</h2>
+      <p class="lead" style="margin:0 auto">Run the tests and you'll know in a minute.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.digiera.gamepadtester">Get it on Google Play</a>
+        <a class="btn ghost" href="privacy-policy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>© 2026 Digiera Games. Gamepad Tester is not affiliated with Microsoft, Sony or Nintendo. Google Play is a trademark of Google LLC.</div>
+    <nav aria-label="Footer">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="mailto:YOUR_EMAIL_HERE">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
